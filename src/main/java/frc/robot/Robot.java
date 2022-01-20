@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -58,6 +59,22 @@ public class Robot extends TimedRobot {
 
     driverGamepad = new Joystick(0);
 
+    if(leftLeader.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+      SmartDashboard.putString("Ramp Rate", "Error");
+    }
+
+    if(leftFollower.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+      SmartDashboard.putString("Ramp Rate", "Error");
+    }
+
+    if(rightLeader.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+      SmartDashboard.putString("Ramp Rate", "Error");
+    }
+
+    if(rightFollower.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+      SmartDashboard.putString("Ramp Rate", "Error");
+    }
+
   }
 
   /**
@@ -108,7 +125,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    driveBase.tankDrive(driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
+    driveBase.tankDrive(-driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
 
 
   }
