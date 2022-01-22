@@ -64,19 +64,19 @@ public class Robot extends TimedRobot {
 
     driverGamepad = new Joystick(0);
 
-    if(leftLeader.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+    if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
-    if(leftFollower.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+    if(leftFollower.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
-    if(rightLeader.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+    if(rightLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
-    if(rightFollower.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
+    if(rightFollower.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
