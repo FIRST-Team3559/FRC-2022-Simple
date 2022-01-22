@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -33,6 +34,8 @@ public class Robot extends TimedRobot {
   private static final int rightLeaderDeviceID = 12;
   private static final int rightFollowerDeviceID = 13;
   private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
+  private Spark feederMotor;
+
 
 
 
@@ -54,6 +57,8 @@ public class Robot extends TimedRobot {
 
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
+
+    feederMotor = new Spark(0);
 
     driveBase = new DifferentialDrive(leftLeader, rightLeader);
 
@@ -126,6 +131,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     driveBase.tankDrive(-driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
+    feeder();
 
 
   }
@@ -145,4 +151,12 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
+
+  public void feeder() {
+    if (driverGamepad.getRawButton(1)) {
+      feederMotor.set(0.8);
+    } else {
+      feederMotor.set(0);
+    }
+  }
 }
