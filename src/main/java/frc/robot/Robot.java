@@ -94,8 +94,10 @@ public class Robot extends TimedRobot implements RelativeEncoder {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
-
+  public void robotPeriodic() {
+  RobotContainer.periodic();
+  }
+ 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
    * autonomous modes using the dashboard. The sendable chooser code works with the Java
