@@ -7,6 +7,7 @@ package frc.robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -21,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements RelativeEncoder {
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
@@ -57,6 +58,9 @@ public class Robot extends TimedRobot {
 
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
+    
+    RobotContainer.getRightEncoder.setPosition(0);
+    RobotContainer.getLeftEncoder.setPosition(0);
 
     feederMotor = new Spark(0);
 
