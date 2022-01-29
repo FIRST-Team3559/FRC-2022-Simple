@@ -14,7 +14,6 @@ import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -32,11 +31,6 @@ public class Robot extends TimedRobot {
 
   private DifferentialDrive driveBase;
   private Joystick driverGamepad;
-  private static final int leftLeaderDeviceID = 10;
-  private static final int leftFollowerDeviceID = 11;
-  private static final int rightLeaderDeviceID = 12;
-  private static final int rightFollowerDeviceID = 13;
-  private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
   private Spark feederMotor;
 
 
@@ -52,14 +46,9 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
-    
-    leftLeader = new CANSparkMax(leftLeaderDeviceID, MotorType.kBrushless);
-    leftFollower = new CANSparkMax(leftFollowerDeviceID, MotorType.kBrushless);
-    rightLeader = new CANSparkMax(rightLeaderDeviceID, MotorType.kBrushless);
-    rightFollower = new CANSparkMax(rightFollowerDeviceID, MotorType.kBrushless);
 
-    leftFollower.follow(leftLeader);
-    rightFollower.follow(rightLeader);
+    mc_leftRear.follow(mc_leftFront);
+    mc_rightRear.follow(mc_rightFront);
     
     DriveSubsystem.getRightEncoder.setPosition(0);
     DriveSubsystem.getLeftEncoder.setPosition(0);
