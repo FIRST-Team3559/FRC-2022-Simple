@@ -4,16 +4,14 @@
 
 package frc.robot;
 
-import frc.robot.subsystems.DriveSubsystem;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -31,6 +29,11 @@ public class Robot extends TimedRobot {
 
   private DifferentialDrive driveBase;
   private Joystick driverGamepad;
+  private static final int leftLeaderDeviceID = 10;
+  private static final int leftFollowerDeviceID = 11;
+  private static final int rightLeaderDeviceID = 12;
+  private static final int rightFollowerDeviceID = 13;
+  private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
   private Spark feederMotor;
 
 
@@ -46,12 +49,14 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
-
-    mc_leftRear.follow(mc_leftFront);
-    mc_rightRear.follow(mc_rightFront);
     
-    DriveSubsystem.getRightEncoder.setPosition(0);
-    DriveSubsystem.getLeftEncoder.setPosition(0);
+    leftLeader = new CANSparkMax(leftLeaderDeviceID, MotorType.kBrushless);
+    leftFollower = new CANSparkMax(leftFollowerDeviceID, MotorType.kBrushless);
+    rightLeader = new CANSparkMax(rightLeaderDeviceID, MotorType.kBrushless);
+    rightFollower = new CANSparkMax(rightFollowerDeviceID, MotorType.kBrushless);
+
+    leftFollower.follow(leftLeader);
+    rightFollower.follow(rightLeader);
 
     feederMotor = new Spark(0);
 
@@ -85,10 +90,8 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {
-  DriveSubsystem.periodic();
-  }
- 
+  public void robotPeriodic() {}
+
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
    * autonomous modes using the dashboard. The sendable chooser code works with the Java
@@ -135,10 +138,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {
-    DriveSubsystem.mcg_left.disable();
-    DriveSubsystem.mcg_right.disable();
-  }
+  public void disabledInit() {}
 
   /** This function is called periodically when disabled. */
   @Override
