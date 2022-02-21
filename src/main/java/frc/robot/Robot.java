@@ -10,10 +10,12 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.cameraserver.CameraServer;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -29,14 +31,14 @@ public class Robot extends TimedRobot {
 
   private DifferentialDrive driveBase;
   private Joystick driverGamepad;
+  private Joystick operatorGamepad;
   private static final int leftLeaderDeviceID = 10;
   private static final int leftFollowerDeviceID = 11;
   private static final int rightLeaderDeviceID = 12;
   private static final int rightFollowerDeviceID = 13;
   private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
   private Spark feederMotor;
-
-
+  private Spark ballTunnel;
 
 
   /**
@@ -59,10 +61,12 @@ public class Robot extends TimedRobot {
     rightFollower.follow(rightLeader);
 
     feederMotor = new Spark(0);
+    ballTunnel = new Spark(1);
 
     driveBase = new DifferentialDrive(leftLeader, rightLeader);
 
     driverGamepad = new Joystick(0);
+    operatorGamepad = new Joystick(1);
 
     if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
@@ -80,6 +84,7 @@ public class Robot extends TimedRobot {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
+    CameraServer.startAutomaticCapture();
   }
 
   /**
@@ -132,9 +137,10 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     driveBase.tankDrive(-driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
     feeder();
+    tunnel();
 
-
-  }
+    }
+  
 
   /** This function is called once when the robot is disabled. */
   @Override
@@ -151,12 +157,25 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
-
+ 
   public void feeder() {
-    if (driverGamepad.getRawButton(1)) {
-      feederMotor.set(0.8);
-    } else {
+    if (operatorGamepad.getRawButton(6)) {
+      feederMotor.set(.5);
+    } 
+    else {
+    if (operatorGamepad.getRawButton(5)) {
+      feederMotor.set(-.5);
+    }
+    else {
       feederMotor.set(0);
+    }
+  }
+}
+  public void tunnel() {
+    if (operatorGamepad.getRawButton(2)) {
+      ballTunnel.set(-.7);
+    } else {
+      ballTunnel.set(0);
     }
   }
 }
