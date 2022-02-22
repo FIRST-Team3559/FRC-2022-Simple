@@ -4,9 +4,18 @@
 
 package frc.robot;
 
+import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.Constants;
+import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.commands.ManualDriveCommand;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,6 +24,11 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -67,6 +81,45 @@ public class Robot extends TimedRobot {
     driveBase = new DifferentialDrive(leftLeader, rightLeader);
 
     driverGamepad = new Joystick(0);
+    
+    bottomTunnelMotor.enableDeadbandElimination(true);
+    topTunnelMotor.enableDeadbandElimination(true);
+
+    mc_leftRear.follow(mc_leftFront);
+    mc_rightRear.follow(mc_rightFront);
+    
+    DriveSubsystem.getRightEncoder.setPosition(0);
+    DriveSubsystem.getLeftEncoder.setPosition(0);
+    
+    /* Creates a thread which converts color images into grayscale,
+    and then detects circle shapes which the robot will go to */
+    m_visionThread = new Thread(
+      () -> {
+        // Starts the camera and sets the resolution, or frame size
+        UsbCamera camera = CameraServer.startAutomaticCapture();
+        camera.setResolution(640, 480);
+        /* Initializes a sink and allows the Mat to access 
+        camera images from the sink */
+        CvSink cvSink = CameraServer.getVideo();
+        CvSource outputStream = CameraServer.putVideo("Circle", 640, 480);
+        Mat mat = new Mat();
+        while (!Thread.interrupted()) {
+                /* Tell the CvSink to grab a frame from the camera and put it
+                in the source mat.  If there is an error notify the output */
+                if (cvSink.grabFrame(mat) == 0) {
+                  // Send the output the error.
+                  outputStream.notifyError(cvSink.getError());
+                  // skip the rest of the current iteration
+                  continue;
+                }
+                Imgproc.HoughCircles(mat, new mat.Mat(), mat.HOUGH_GRADIENT, 1, 45, 75, 40, 20, 80);
+                // Give the output stream a new image to display
+                outputStream.putFrame(mat);
+              }
+            });
+    
+    m_visionThread.setDaemon(true);
+    m_visionThread.start();
 
     if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
