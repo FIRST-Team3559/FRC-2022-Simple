@@ -51,6 +51,7 @@ public class Robot extends TimedRobot {
   private Spark feederMotor;
   private Spark ballTunnel;
   private Spark shooterMotor;
+  private Thread m_visionThread;
 
 
   /**
@@ -106,7 +107,7 @@ public class Robot extends TimedRobot {
     if(rightFollower.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
-
+    CameraServer.startAutomaticCapture;
   }
 
   /**
@@ -228,12 +229,12 @@ public class Robot extends TimedRobot {
    }
   }
   public void shooter() {
-    int[] motorSpeeds = {.1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+    int[] motorSpeeds = {.1, .2, .4, .5, .7, .8, 1};
     
     if (operatorStick.getRawButton(2)) {
       for (i = 0; i < motorSpeeds.length; i++) {
         shooterMotor.set(i);
-        wait(500);
+        wait(715);
       }
     }
   }
