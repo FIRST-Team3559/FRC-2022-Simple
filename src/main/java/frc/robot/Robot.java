@@ -3,20 +3,17 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
+import java.util.Arrary;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.Constants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.commands.ManualDriveCommand;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
-
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -53,7 +50,7 @@ public class Robot extends TimedRobot {
   private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
   private Spark feederMotor;
   private Spark ballTunnel;
-
+  private Spark shooterMotor;
 
 
   /**
@@ -77,10 +74,13 @@ public class Robot extends TimedRobot {
 
     feederMotor = new Spark(0);
     ballTunnel = new Spark(1);
+    shooterMotor = new Spark(3);
 
     driveBase = new DifferentialDrive(leftLeader, rightLeader);
 
-    driverGamepad = new Joystick(0);
+    driveLeft = new Joystick(0);
+    driveRight = new Joystick(1);
+    operatorStick = new Joystick(2);
     
     bottomTunnelMotor.enableDeadbandElimination(true);
     topTunnelMotor.enableDeadbandElimination(true);
@@ -90,36 +90,6 @@ public class Robot extends TimedRobot {
     
     DriveSubsystem.getRightEncoder.setPosition(0);
     DriveSubsystem.getLeftEncoder.setPosition(0);
-    
-    /* Creates a thread which converts color images into grayscale,
-    and then detects circle shapes which the robot will go to */
-    m_visionThread = new Thread(
-      () -> {
-        // Starts the camera and sets the resolution, or frame size
-        UsbCamera camera = CameraServer.startAutomaticCapture();
-        camera.setResolution(640, 480);
-        /* Initializes a sink and allows the Mat to access 
-        camera images from the sink */
-        CvSink cvSink = CameraServer.getVideo();
-        CvSource outputStream = CameraServer.putVideo("Circle", 640, 480);
-        Mat mat = new Mat();
-        while (!Thread.interrupted()) {
-                /* Tell the CvSink to grab a frame from the camera and put it
-                in the source mat.  If there is an error notify the output */
-                if (cvSink.grabFrame(mat) == 0) {
-                  // Send the output the error.
-                  outputStream.notifyError(cvSink.getError());
-                  // skip the rest of the current iteration
-                  continue;
-                }
-                Imgproc.HoughCircles(mat, new mat.Mat(), mat.HOUGH_GRADIENT, 1, 45, 75, 40, 20, 80);
-                // Give the output stream a new image to display
-                outputStream.putFrame(mat);
-              }
-            });
-    
-    m_visionThread.setDaemon(true);
-    m_visionThread.start();
 
     if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
@@ -164,6 +134,37 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+    
+    /* Creates a thread which converts color images into grayscale,
+    and then detects circle shapes which the robot will go to */
+    m_visionThread = new Thread(
+      () -> {
+        // Starts the camera and sets the resolution, or frame size
+        UsbCamera camera = CameraServer.startAutomaticCapture();
+        camera.setResolution(640, 480);
+        /* Initializes a sink and allows the Mat to access 
+        camera images from the sink */
+        CvSink cvSink = CameraServer.getVideo();
+        CvSource outputStream = CameraServer.putVideo("Circle", 640, 480);
+        Mat mat = new Mat();
+        while (!Thread.interrupted()) {
+                /* Tell the CvSink to grab a frame from the camera and put it
+                in the source mat.  If there is an error notify the output */
+                if (cvSink.grabFrame(mat) == 0) {
+                  // Send the output the error.
+                  outputStream.notifyError(cvSink.getError());
+                  // skip the rest of the current iteration
+                  continue;
+                }
+                Imgproc.cvtColor(mat, mat, COLOR_BGR2GRAY, 3);
+                Imgproc.HoughCircles(mat, mat, mat.HOUGH_GRADIENT, 1, 45, 75, 40, 20, 80);
+                // Give the output stream a new image to display
+                outputStream.putFrame(mat);
+              }
+            });
+    
+    m_visionThread.setDaemon(true);
+    m_visionThread.start();
   }
 
   /** This function is called periodically during autonomous. */
@@ -190,7 +191,7 @@ public class Robot extends TimedRobot {
     driveBase.tankDrive(-driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
     feeder();
     tunnel();
-
+    shooter();
   }
 
   /** This function is called once when the robot is disabled. */
@@ -210,8 +211,11 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {}
 
   public void feeder() {
-    if (driverGamepad.getRawButton(1)) {
-      feederMotor.set(0.8);
+    if (operatorStick.getRawButton(5)) {
+      feederMotor.set(0.5);
+    } else {
+    if (operatorStick.getRawButton(4)) {
+      feederMotor.set(-.5);
     } else {
       feederMotor.set(0);
     }
@@ -222,5 +226,15 @@ public class Robot extends TimedRobot {
     } else {
       ballTunnel.set(0);
    }
+  }
+  public void shooter() {
+    int[] motorSpeeds = {.1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+    
+    if (operatorStick.getRawButton(2)) {
+      for (i = 0; i < motorSpeeds.length; i++) {
+        shooterMotor.set(i);
+        wait(500);
+      }
+    }
   }
 }
