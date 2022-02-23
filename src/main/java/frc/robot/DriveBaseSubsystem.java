@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DifferenceDriveOdometry;
 
 public class DriveBaseSubsystem extends SubsystemBase {
    // Motor controllers Left
@@ -38,6 +39,19 @@ public class DriveBaseSubsystem extends SubsystemBase {
     
     resetEncoders();
   }
+   
+  @Override
+public void periodic() {
+  // Get my gyro angle. We are negating the value because gyros return positive
+  // values as the robot turns clockwise. This is not standard convention that is
+  // used by the WPILib classes.
+  var gyroAngle = Rotation2d.fromDegrees(-m_gyro.getAngle());
+
+  // Update the pose
+  m_pose = m_odometry.update(gyroAngle, m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+   
+  
+}
   
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
     return new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate());
