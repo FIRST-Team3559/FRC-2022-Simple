@@ -10,26 +10,26 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.DifferenceDriveOdometry;
+import edu.wpi.first.wpilibj.DifferentialDriveOdometry;
 
 public class DriveBaseSubsystem extends SubsystemBase {
    // Motor controllers Left
   public CANSparkMax mc_leftFront = new CANSparkMax(Constants.FL_MOTOR_CONTROLLER_ID, MotorType.kBrushless);
   public CANSparkMax mc_leftRear = new CANSparkMax(Constants.RL_MOTOR_CONTROLLER_ID, MotorType.kBrushless);
-  MotorControllerGroup mcg_left = new MotorControllerGroup(mc_leftFront, mc_leftRear);
-  
+  public MotorControllerGroup mcg_left = new MotorControllerGroup(mc_leftFront, mc_leftRear);
   // Motor controllers Right
   public CANSparkMax mc_rightFront = new CANSparkMax(Constants.FR_MOTOR_CONTROLLER_ID, MotorType.kBrushless);
   public CANSparkMax mc_rightRear = new CANSparkMax(Constants.RR_MOTOR_CONTROLLER_ID, MotorType.kBrushless);
-  MotorControllerGroup mcg_right = new MotorControllerGroup(mc_rightFront, mc_rightRear);
+  public MotorControllerGroup mcg_right = new MotorControllerGroup(mc_rightFront, mc_rightRear);
   
   public DifferentialDrive drivetrain = new DifferentialDrive(mcg_left, mcg_right);
   private final SparkMaxRelativeEncoder m_leftEncoder = new SparkMaxRelativeEncoder;
   private final SparkMaxRelativeEncoder m_rightEncoder = new SparkMaxRelativeEncoder;
-   
   public final ADXRS450_Gyro gyro;
-   
   public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(Constants.kTrackwidthMeters);
+  public var gyroAngle;
+  public DifferentialDriveOdometry m_odometry = new DifferentialDriveOdometry(gyroAngle, 0);
+  public Pose2d m_pose;
   
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -45,12 +45,10 @@ public void periodic() {
   // Get my gyro angle. We are negating the value because gyros return positive
   // values as the robot turns clockwise. This is not standard convention that is
   // used by the WPILib classes.
-  var gyroAngle = Rotation2d.fromDegrees(-m_gyro.getAngle());
+  gyroAngle = Rotation2d.fromDegrees(-m_gyro.getAngle());
 
   // Update the pose
   m_pose = m_odometry.update(gyroAngle, m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
-   
-  
 }
   
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
