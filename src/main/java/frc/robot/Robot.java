@@ -23,7 +23,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -58,11 +63,13 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
     
+    private Thread m_visionThread;
+    
     leftLeader = new CANSparkMax(leftLeaderDeviceID, MotorType.kBrushless);
     leftFollower = new CANSparkMax(leftFollowerDeviceID, MotorType.kBrushless);
     rightLeader = new CANSparkMax(rightLeaderDeviceID, MotorType.kBrushless);
     rightFollower = new CANSparkMax(rightFollowerDeviceID, MotorType.kBrushless);
-
+    
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
 
@@ -78,8 +85,12 @@ public class Robot extends TimedRobot {
     DriveBaseSubsystem.getRightEncoder.setPosition(0);
     DriveBaseSubsystem.getLeftEncoder.setPosition(0);
     
-    if (
-    gyro.calibrate();
+    if (m_odometry.getPoseMeters(0, 0) {
+      gyro.calibrate();
+    }
+    
+    gyroAngle = 0;
+    m_odometry.resetPosition(0, gyroAngle);
 
     if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
@@ -97,7 +108,9 @@ public class Robot extends TimedRobot {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
     
-    CameraServer.startAutomaticCapture;
+    // Starts the camera and sets the resolution, or frame size
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(640, 480);
   }
 
   /**
@@ -108,7 +121,9 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+  DriveBaseSubsystem.periodic();
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -133,6 +148,36 @@ public class Robot extends TimedRobot {
     switch (m_autoSelected) {
       case kCustomAuto:
         // Put custom auto code here
+         /* Creates a thread which converts color images into grayscale,
+    and then detects circle shapes which the robot will go to */
+m_visionThread = new Thread(
+      () -> {
+        /* Initializes a sink and allows the Mat to access 
+        camera images from the sink */
+        CvSink cvSink = CameraServer.getVideo();
+        CvSource outputStream = CameraServer.putVideo("Circle", 640, 480);
+        Mat mat = new Mat();
+        while (!Thread.interrupted()) {
+                /* Tell the CvSink to grab a frame from the camera and put it
+                in the source mat.  If there is an error notify the output */
+                if (cvSink.grabFrame(mat) == 0) {
+                  // Send the output the error.
+                  outputStream.notifyError(cvSink.getError());
+                  // skip the rest of the current iteration
+                  continue;
+                }
+                Imgproc.cvtColor(mat, mat, COLOR_BGR2GRAY, 3);
+                Imgproc.HoughCircles(mat, mat, mat.HOUGH_GRADIENT, 1, 45, 75, 40, 20, 80);
+                // Give the output stream a new image to display
+                outputStream.putFrame(mat);
+              }
+            });
+    
+    m_visionThread.setDaemon(true);
+    m_visionThread.start();
+        
+        
+
         break;
       case kDefaultAuto:
       default:
@@ -143,7 +188,11 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    gyroAngle = 0
+    m_odometry.resetPosition(0, gyroAngle);
+    gyro.reset();
+  }
 
   /** This function is called periodically during operator control. */
   @Override
@@ -169,5 +218,4 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
-  
 }
