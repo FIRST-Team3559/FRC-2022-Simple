@@ -5,9 +5,11 @@
 package frc.robot;
 
 import java.util.Arrary;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.DriveBaseSubsystem;
 import frc.robot.Constants;
-import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.FeederSubsystem;
+import frc.robot.ShooterSubsystem;
+import frc.robot.TunnelSubsystem;
 import frc.robot.commands.ManualDriveCommand;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -22,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -35,17 +38,14 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private DifferentialDrive driveBase;
-  private Joystick driverLeft;
-  private Joystick driverRight;
+  private Joystick leftStick;
+  private Joystick rightStick;
   private Joystick operatorStick;
   private static final int leftLeaderDeviceID = 10;
   private static final int leftFollowerDeviceID = 11;
   private static final int rightLeaderDeviceID = 12;
   private static final int rightFollowerDeviceID = 13;
   private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
-  private Spark feederMotor;
-  private Spark ballTunnel;
-  private Spark shooterMotor;
 
   /**
    * 
@@ -66,21 +66,20 @@ public class Robot extends TimedRobot {
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
 
-    feederMotor = new Spark(0);
-    ballTunnel = new Spark(1);
-    shooterMotor = new Spark(3);
-
     driveBase = new DifferentialDrive(leftLeader, rightLeader);
 
-    driveLeft = new Joystick(0);
-    driveRight = new Joystick(1);
+    leftStick = new Joystick(0);
+    rightStick = new Joystick(1);
     operatorStick = new Joystick(2);
 
     mc_leftRear.follow(mc_leftFront);
     mc_rightRear.follow(mc_rightFront);
     
-    DriveSubsystem.getRightEncoder.setPosition(0);
-    DriveSubsystem.getLeftEncoder.setPosition(0);
+    DriveBaseSubsystem.getRightEncoder.setPosition(0);
+    DriveBaseSubsystem.getLeftEncoder.setPosition(0);
+    
+    if (
+    gyro.calibrate();
 
     if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
@@ -149,10 +148,10 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    driveBase.tankDrive(-driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
-    feeder();
-    tunnel();
-    shooter();
+    driveBase.tankDrive(leftStick.getRawAxis(1), leftStick.getRawAxis(5));
+    FeederSubsystem.feeder();
+    TunnelSubsystem.tunnel();
+    ShooterSubsystem.shooter();
   }
 
   /** This function is called once when the robot is disabled. */
@@ -170,32 +169,5 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
-
-  public void feeder() {
-    if (operatorStick.getRawButton(5)) {
-      feederMotor.set(0.5);
-    } else {
-    if (operatorStick.getRawButton(4)) {
-      feederMotor.set(-.5);
-    } else {
-      feederMotor.set(0);
-    }
-  }
-  public void tunnel() {
-    if (operatorStick.getRawButton(3)) {
-      ballTunnel.set(-.7);
-    } else {
-      ballTunnel.set(0);
-   }
-  }
-  public void shooter() {
-    int[] motorSpeeds = {.1, .2, .4, .5, .7, .8, 1};
-    
-    if (operatorStick.getRawButton(2)) {
-      for (i = 0; i < motorSpeeds.length; i++) {
-        shooterMotor.set(i);
-        wait(715);
-      }
-    }
-  }
+  
 }
