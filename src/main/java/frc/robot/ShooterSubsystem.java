@@ -10,8 +10,7 @@ public class ShooterSubsystem extends SubsystemBase {
   
   shooterMotor2.follow(shooterMotor1);
   
-  @Override
-  public void periodic() {
+  public void shooter() {
     int[] motorSpeeds = {.1, .2, .4, .5, .7, .8, 1};
     
     if (operatorStick.getRawButton(2)) {
