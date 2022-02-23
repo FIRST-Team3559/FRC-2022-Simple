@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
 public class DriveBaseSubsystem extends SubsystemBase {
    // Motor controllers Left
@@ -24,6 +25,8 @@ public class DriveBaseSubsystem extends SubsystemBase {
   public DifferentialDrive drivetrain = new DifferentialDrive(mcg_left, mcg_right);
   private final SparkMaxRelativeEncoder m_leftEncoder = new SparkMaxRelativeEncoder;
   private final SparkMaxRelativeEncoder m_rightEncoder = new SparkMaxRelativeEncoder;
+   
+  public final ADXRS450_Gyro gyro;
    
   public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(Constants.kTrackwidthMeters);
   
