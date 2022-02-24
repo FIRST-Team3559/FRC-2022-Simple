@@ -29,6 +29,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.MotorSafety;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -140,6 +141,14 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+    gyroAngle = 0
+    m_odometry.resetPosition(0, gyroAngle);
+    gyro.reset();
+    rightLeader.setSafetyEnabled(true);
+    leftLeader.setSafetyEnabled(true);
+    
+    rightLeader.setExpiration(3);
+    leftLeader.setExpiration(3);
   }
 
   /** This function is called periodically during autonomous. */
@@ -148,18 +157,64 @@ public class Robot extends TimedRobot {
     switch (m_autoSelected) {
       case kCustomAuto:
         // Put custom auto code here
-         /* Creates a thread which converts color images into grayscale,
-    and then detects circle shapes which the robot will go to */
+         driveBase.tankDrive(.5, .5);
+        MotorStop();
+        driveBase.curvatureDrive(0, 90, true);
+        MotorStop();
+        driveBase.tankDrive(.5, .5);
+        MotorStop();
+    
+        public void MotorStop {
+          if(!rightLeader.isAlive && !leftLeader.isAlive) {
+            rightLeader.stopMotor;
+            leftLeader.stopMotor;
+          }
+        }
+        break;
+      case kDefaultAuto:
+         driveBase.tankDrive(.5, .5);
+        MotorStop();
+        driveBase.curvatureDrive(0, 90, true);
+        MotorStop();
+        driveBase.tankDrive(.5, .5);
+        MotorStop();
+    
+        public void MotorStop {
+          if(!rightLeader.isAlive && !leftLeader.isAlive) {
+            rightLeader.stopMotor;
+            leftLeader.stopMotor;
+          }
+        }
+      default:
+        // Put default auto code here
+         driveBase.tankDrive(.5, .5);
+        MotorStop();
+        driveBase.curvatureDrive(0, 90, true);
+        MotorStop();
+        driveBase.tankDrive(.5, .5);
+        MotorStop();
+    
+        public void MotorStop {
+          if(!rightLeader.isAlive && !leftLeader.isAlive) {
+            rightLeader.stopMotor;
+            leftLeader.stopMotor;
+          }
+        }
+        break;
+    }
+    
+    /* Creates a thread which converts color images into grayscale,
+    and then detects circle shapes which the robot will go to 
 m_visionThread = new Thread(
       () -> {
-        /* Initializes a sink and allows the Mat to access 
-        camera images from the sink */
+        // Initializes a sink and allows the Mat to access 
+        // camera images from the sink 
         CvSink cvSink = CameraServer.getVideo();
         CvSource outputStream = CameraServer.putVideo("Circle", 640, 480);
         Mat mat = new Mat();
         while (!Thread.interrupted()) {
-                /* Tell the CvSink to grab a frame from the camera and put it
-                in the source mat.  If there is an error notify the output */
+                // Tell the CvSink to grab a frame from the camera and put it
+                // in the source mat.  If there is an error notify the output
                 if (cvSink.grabFrame(mat) == 0) {
                   // Send the output the error.
                   outputStream.notifyError(cvSink.getError());
@@ -174,16 +229,9 @@ m_visionThread = new Thread(
             });
     
     m_visionThread.setDaemon(true);
-    m_visionThread.start();
+    m_visionThread.start(); */
         
-        
-
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+      
   }
 
   /** This function is called once when teleop is enabled. */
@@ -213,7 +261,11 @@ m_visionThread = new Thread(
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    gyroAngle = 0
+    m_odometry.resetPosition(0, gyroAngle);
+    gyro.reset();
+  }
 
   /** This function is called periodically during test mode. */
   @Override
