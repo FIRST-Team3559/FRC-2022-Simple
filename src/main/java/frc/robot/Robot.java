@@ -4,10 +4,17 @@
 
 package frc.robot;
 
+import java.util.Arrary;
+import frc.robot.DriveBaseSubsystem;
+import frc.robot.Constants;
+import frc.robot.FeederSubsystem;
+import frc.robot.ShooterSubsystem;
+import frc.robot.TunnelSubsystem;
+import frc.robot.commands.ManualDriveCommand;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
@@ -15,7 +22,19 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+<<<<<<< HEAD
 import edu.wpi.first.cameraserver.CameraServer;
+=======
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.MotorSafety;
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -30,16 +49,25 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private DifferentialDrive driveBase;
+<<<<<<< HEAD
   private Joystick driverGamepad;
   private Joystick operatorGamepad;
+=======
+  private Joystick leftStick;
+  private Joystick rightStick;
+  private Joystick operatorStick;
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
   private static final int leftLeaderDeviceID = 10;
   private static final int leftFollowerDeviceID = 11;
   private static final int rightLeaderDeviceID = 12;
   private static final int rightFollowerDeviceID = 13;
   private CANSparkMax leftLeader, leftFollower, rightLeader, rightFollower;
+<<<<<<< HEAD
   private Spark feederMotor;
   private Spark ballTunnel;
 
+=======
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
 
   /**
    * 
@@ -52,14 +80,17 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
     
+    private Thread m_visionThread;
+    
     leftLeader = new CANSparkMax(leftLeaderDeviceID, MotorType.kBrushless);
     leftFollower = new CANSparkMax(leftFollowerDeviceID, MotorType.kBrushless);
     rightLeader = new CANSparkMax(rightLeaderDeviceID, MotorType.kBrushless);
     rightFollower = new CANSparkMax(rightFollowerDeviceID, MotorType.kBrushless);
-
+    
     leftFollower.follow(leftLeader);
     rightFollower.follow(rightLeader);
 
+<<<<<<< HEAD
     feederMotor = new Spark(0);
     ballTunnel = new Spark(1);
 
@@ -67,6 +98,26 @@ public class Robot extends TimedRobot {
 
     driverGamepad = new Joystick(0);
     operatorGamepad = new Joystick(1);
+=======
+    driveBase = new DifferentialDrive(leftLeader, rightLeader);
+
+    leftStick = new Joystick(0);
+    rightStick = new Joystick(1);
+    operatorStick = new Joystick(2);
+
+    mc_leftRear.follow(mc_leftFront);
+    mc_rightRear.follow(mc_rightFront);
+    
+    DriveBaseSubsystem.getRightEncoder.setPosition(0);
+    DriveBaseSubsystem.getLeftEncoder.setPosition(0);
+    
+    if (m_odometry.getPoseMeters(0, 0) {
+      gyro.calibrate();
+    }
+    
+    gyroAngle = 0;
+    m_odometry.resetPosition(0, gyroAngle);
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
 
     if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
@@ -83,8 +134,15 @@ public class Robot extends TimedRobot {
     if(rightFollower.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
+<<<<<<< HEAD
 
     CameraServer.startAutomaticCapture();
+=======
+    
+    // Starts the camera and sets the resolution, or frame size
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(640, 480);
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
   }
 
   /**
@@ -95,7 +153,9 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+  DriveBaseSubsystem.periodic();
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -112,6 +172,14 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+    gyroAngle = 0
+    m_odometry.resetPosition(0, gyroAngle);
+    gyro.reset();
+    rightLeader.setSafetyEnabled(true);
+    leftLeader.setSafetyEnabled(true);
+    
+    rightLeader.setExpiration(3);
+    leftLeader.setExpiration(3);
   }
 
   /** This function is called periodically during autonomous. */
@@ -120,27 +188,108 @@ public class Robot extends TimedRobot {
     switch (m_autoSelected) {
       case kCustomAuto:
         // Put custom auto code here
+         driveBase.tankDrive(.5, .5);
+        MotorStop();
+        driveBase.curvatureDrive(0, 90, true);
+        MotorStop();
+        driveBase.tankDrive(.5, .5);
+        MotorStop();
+    
+        public void MotorStop {
+          if(!rightLeader.isAlive && !leftLeader.isAlive) {
+            rightLeader.stopMotor;
+            leftLeader.stopMotor;
+          }
+        }
         break;
       case kDefaultAuto:
+         driveBase.tankDrive(.5, .5);
+        MotorStop();
+        driveBase.curvatureDrive(0, 90, true);
+        MotorStop();
+        driveBase.tankDrive(.5, .5);
+        MotorStop();
+    
+        public void MotorStop {
+          if(!rightLeader.isAlive && !leftLeader.isAlive) {
+            rightLeader.stopMotor;
+            leftLeader.stopMotor;
+          }
+        }
       default:
         // Put default auto code here
+         driveBase.tankDrive(.5, .5);
+        MotorStop();
+        driveBase.curvatureDrive(0, 90, true);
+        MotorStop();
+        driveBase.tankDrive(.5, .5);
+        MotorStop();
+    
+        public void MotorStop {
+          if(!rightLeader.isAlive && !leftLeader.isAlive) {
+            rightLeader.stopMotor;
+            leftLeader.stopMotor;
+          }
+        }
         break;
     }
+    
+    /* Creates a thread which converts color images into grayscale,
+    and then detects circle shapes which the robot will go to 
+m_visionThread = new Thread(
+      () -> {
+        // Initializes a sink and allows the Mat to access 
+        // camera images from the sink 
+        CvSink cvSink = CameraServer.getVideo();
+        CvSource outputStream = CameraServer.putVideo("Circle", 640, 480);
+        Mat mat = new Mat();
+        while (!Thread.interrupted()) {
+                // Tell the CvSink to grab a frame from the camera and put it
+                // in the source mat.  If there is an error notify the output
+                if (cvSink.grabFrame(mat) == 0) {
+                  // Send the output the error.
+                  outputStream.notifyError(cvSink.getError());
+                  // skip the rest of the current iteration
+                  continue;
+                }
+                Imgproc.cvtColor(mat, mat, COLOR_BGR2GRAY, 3);
+                Imgproc.HoughCircles(mat, mat, mat.HOUGH_GRADIENT, 1, 45, 75, 40, 20, 80);
+                // Give the output stream a new image to display
+                outputStream.putFrame(mat);
+              }
+            });
+    
+    m_visionThread.setDaemon(true);
+    m_visionThread.start(); */
+        
+      
   }
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    gyroAngle = 0
+    m_odometry.resetPosition(0, gyroAngle);
+    gyro.reset();
+  }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+<<<<<<< HEAD
     driveBase.tankDrive(-driverGamepad.getRawAxis(1), driverGamepad.getRawAxis(5));
     feeder();
     tunnel();
 
     }
   
+=======
+    driveBase.tankDrive(leftStick.getRawAxis(1), leftStick.getRawAxis(5));
+    FeederSubsystem.feeder();
+    TunnelSubsystem.tunnel();
+    ShooterSubsystem.shooter();
+  }
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
 
   /** This function is called once when the robot is disabled. */
   @Override
@@ -152,11 +301,16 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    gyroAngle = 0
+    m_odometry.resetPosition(0, gyroAngle);
+    gyro.reset();
+  }
 
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
+<<<<<<< HEAD
  
   public void feeder() {
     if (operatorGamepad.getRawButton(6)) {
@@ -170,6 +324,8 @@ public class Robot extends TimedRobot {
       feederMotor.set(0);
     }
   }
+=======
+>>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
 }
   public void tunnel() {
     if (operatorGamepad.getRawButton(2)) {
