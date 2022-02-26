@@ -119,19 +119,19 @@ public class Robot extends TimedRobot {
     m_odometry.resetPosition(0, gyroAngle);
 >>>>>>> 3ee108e621dfc40559725a1ab95f2da345d02712
 
-    if(leftLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
+    if(leftLeader.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
-    if(leftFollower.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
+    if(leftFollower.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
-    if(rightLeader.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
+    if(rightLeader.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 
-    if(rightFollower.setOpenLoopRampRate(.5) !=REVLibError.kOk) {
+    if(rightFollower.setOpenLoopRampRate(1.5) !=REVLibError.kOk) {
       SmartDashboard.putString("Ramp Rate", "Error");
     }
 <<<<<<< HEAD
